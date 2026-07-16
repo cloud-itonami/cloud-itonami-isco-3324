@@ -4,6 +4,25 @@ Open Occupation Blueprint for **ISCO-08 3324**: Trade Brokers.
 
 This repository designs a forkable OSS business for an independent trade brokerage practice: a document-handling and shipment-tracking robot manages trade documentation under a governor-gated actor, so the practice keeps its own deal records instead of renting a closed trade-platform SaaS.
 
+**Maturity: `:implemented`.** `src/tradebroker/` implements the
+`TradeBrokerageActor` as a `langgraph.graph/state-graph` (`tradebroker.actor`)
+wired to a `Trade Advisor` (`tradebroker.advisor`) and an independent
+`TradeBrokerageGovernor` (`tradebroker.governor`), following the
+itonami actor pattern (ADR-2607011000): `:intake -> :advise -> :govern
+-> :decide -+-> :commit (:ok?) +-> :request-approval (:escalate?,
+human-in-the-loop interrupt) +-> :hold (:hard?)`. 14 tests / 29
+assertions green (`clojure -M:test`). HARD invariants (always hold,
+never overridable): principal provenance, no-actuation (`:effect` must be
+`:propose`), a registered deal basis for any deal proposal, the
+deal value not exceeding the principal's registered trade-authorization
+ceiling (confirmation beyond it is unauthorized confirmation, not routine
+deal), and counterparty verification completion before any deal can be
+processed (processing without verification is incomplete counterparty due
+diligence, not proper deal service). Always-escalate ops (human
+sign-off regardless of confidence, mapping this repo's Trust Controls in
+[`docs/business-model.md`](docs/business-model.md)): `:confirm-deal`
+and `:file-shipment`.
+
 ## Robotics premise
 
 All cloud-itonami verticals are designed on the premise that a **robot performs
