@@ -51,3 +51,38 @@
   ([] (mem-store {}))
   ([seed] (->MemStore (atom (merge {:principals {} :deals {} :records [] :ledger []}
                                    seed)))))
+
+;; ----------------------------- deterministic demo seed -----------------------------
+
+(defn- demo-data
+  "The demo principal/deal set. Deterministic -- no clock, no rand, no
+  I/O -- so every caller (tests, the OS console, a sim run) sees the
+  same store and a diff in behaviour is a diff in the actor.
+
+  `principal-2` is registered but UNVERIFIED, and `D-3` is a registered
+  deal that has not cleared counterparty verification: both exist so
+  the governor's `:counterparty-unverified` and
+  `:trade-authority-exceeded` HARD rules have something real to refuse.
+  A seed that only contains the happy path cannot show a gate working."
+  []
+  {:principals
+   {"principal-1" {:principal-id "principal-1" :name "Importer A"
+                   :trade-authorization-ceiling 100000 :verified true}
+    "principal-2" {:principal-id "principal-2" :name "Trader B"
+                   :trade-authorization-ceiling 20000 :verified false}}
+   :deals
+   {"D-1" {:deal-id "D-1" :principal-id "principal-1"
+           :counterparty-id "exporter-1" :commodity "coffee"
+           :deal-value 50000 :verified true}
+    "D-2" {:deal-id "D-2" :principal-id "principal-1"
+           :counterparty-id "exporter-2" :commodity "cocoa"
+           :deal-value 150000 :verified true}
+    "D-3" {:deal-id "D-3" :principal-id "principal-2"
+           :counterparty-id "exporter-3" :commodity "sugar"
+           :deal-value 5000 :verified false}}})
+
+(defn seed-db
+  "A MemStore seeded with the demo principal/deal set. The
+  deterministic default."
+  []
+  (mem-store (demo-data)))
