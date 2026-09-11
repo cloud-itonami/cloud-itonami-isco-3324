@@ -11,7 +11,7 @@ wired to a `Trade Advisor` (`tradebroker.advisor`) and an independent
 itonami actor pattern (ADR-2607011000): `:intake -> :advise -> :govern
 -> :decide -+-> :commit (:ok?) +-> :request-approval (:escalate?,
 human-in-the-loop interrupt) +-> :hold (:hard?)`. 14 tests / 29
-assertions green (`clojure -M:test`). HARD invariants (always hold,
+assertions green (`kbb -M:test`). HARD invariants (always hold,
 never overridable): principal provenance, no-actuation (`:effect` must be
 `:propose`), a registered deal basis for any deal proposal, the
 deal value not exceeding the principal's registered trade-authorization
