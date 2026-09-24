@@ -1,0 +1,33 @@
+;; What this occupation's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README "Robotics premise": a document-handling and shipment-tracking robot
+;; performs bill-of-lading printing, cargo-manifest filing and physical
+;; archival (ISCO 3324 trade brokers). Its physical work: running original
+;; bills of lading from the brokerage office to the terminal gate office over
+;; the port road, and dropping document pouches into the gate drop box.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-3324"
+ :cases
+ [{:id :bill-of-lading-run-to-gate
+   :kind :transport
+   :procedure "outdoor delivery robot carries original bills of lading from the brokerage office to the terminal gate office"
+   :params {:mass-kg 60.0 :payload-kg 5.0 :v-max-mps 2.0 :a-max-mps2 0.5
+            :brake-decel-mps2 1.0 :drive-force-n 200.0 :crr 0.02
+            :cog-height-m 0.50 :support-half-length-m 0.30}
+   :sweep {:param :distance-m :values [100.0 200.0 400.0 600.0 800.0]}
+   :quantity :cycle-time-s
+   :limit {:max 300.0 :basis "estimate: originals must reach the gate within 5 minutes of release so the truck is not held at the gate"}
+   :boundary {:lo 50.0 :hi 1500.0}}
+  {:id :pouch-into-drop-box
+   :kind :manipulator
+   :procedure "arm lifts a document pouch from the robot's tray into the raised slot of the gate drop box"
+   :params {:l1-m 0.35 :l2-m 0.30 :m1-kg 2.5 :m2-kg 1.8
+            :from [0.40 0.05] :to [0.25 0.50] :duration-s 1.5 :steps 300}
+   :sweep {:param :payload-kg :values [0.2 0.5 1.0 2.0 3.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 25.0 :basis "estimate: continuous shoulder torque of a ~2 kg-payload mobile-manipulator arm"}
+   :boundary {:lo 0.05 :hi 10.0}}]}
